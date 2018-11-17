@@ -410,6 +410,23 @@ static void input_linux_set_repeat(Object *obj, bool value,
     il->repeat = value;
 }
 
+static bool input_linux_get_is_grabbed(Object *obj, Error **errp)
+{
+    InputLinux *il = INPUT_LINUX(obj);
+
+    return il->grab_active;
+}
+
+static void input_linux_set_is_grabbed(Object *obj, bool value,
+                                   Error **errp)
+{
+    InputLinux *il = INPUT_LINUX(obj);
+
+    if (!il->grab_active) {
+	input_linux_toggle_grab(il);
+    }
+}
+
 static void input_linux_instance_init(Object *obj)
 {
     object_property_add_str(obj, "evdev",
@@ -421,6 +438,9 @@ static void input_linux_instance_init(Object *obj)
     object_property_add_bool(obj, "repeat",
                              input_linux_get_repeat,
                              input_linux_set_repeat, NULL);
+    object_property_add_bool(obj, "is_grabbed",
+                             input_linux_get_is_grabbed,
+                             input_linux_set_is_grabbed, NULL);
 }
 
 static void input_linux_class_init(ObjectClass *oc, void *data)

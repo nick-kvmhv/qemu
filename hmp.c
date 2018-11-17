@@ -2927,3 +2927,28 @@ void hmp_info_memory_size_summary(Monitor *mon, const QDict *qdict)
     }
     hmp_handle_error(mon, &err);
 }
+
+static int hmp_findgrab_foreach(Object *obj, void *opaque)
+{
+	Monitor *mon = opaque;
+	Object * input = object_dynamic_cast(obj,"input-linux");
+	if ( input != NULL ) {
+		Error* err;
+		bool graball = object_property_get_bool(input,"grab_all",&err);
+		if (graball) { 
+	            monitor_printf(mon, "Trying to grab focus \n");
+                    g_usleep(2*1000000);
+		    object_property_set_bool(input,true,"is_grabbed",&err);
+                }
+        }
+	return 0;
+}
+
+void hmp_focusgrab(Monitor *mon, const QDict *qdict)
+{
+//	Object *obj = NULL;
+//	monitor_printf(mon, "test executed " PRIu64 "\n");
+	object_child_foreach_recursive(object_get_root(),
+                                   hmp_findgrab_foreach, mon);
+}
+

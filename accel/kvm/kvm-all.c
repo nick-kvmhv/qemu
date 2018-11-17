@@ -1707,7 +1707,15 @@ static int kvm_handle_internal_error(CPUState *cpu, struct kvm_run *run)
     if (run->internal.suberror == KVM_INTERNAL_ERROR_EMULATION) {
         fprintf(stderr, "emulation failure\n");
         if (!kvm_arch_stop_on_emulation_error(cpu)) {
+            fprintf(stderr, "calling qemu_system_shutdown_request2\n");
             cpu_dump_state(cpu, stderr, fprintf, CPU_DUMP_CODE);
+/*getting this error upon shutdown*/
+            
+            return EXCP_INTERRUPT;
+        } else {
+  	    fprintf(stderr, "kvm_arch_stop_on_emulation_error\n");
+            cpu_dump_state(cpu, stderr, fprintf, CPU_DUMP_CODE);
+	    qemu_system_shutdown_request(SHUTDOWN_CAUSE_GUEST_SHUTDOWN);
             return EXCP_INTERRUPT;
         }
     }
